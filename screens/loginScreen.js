@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useContext} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -21,19 +21,52 @@ import {
 } from '../utils/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {ErrorComponent} from '../components/errors';
+import {CreateErrorContext} from '../feature/context';
 
-export const LoginScreen = ({navigation}) => {
-  const {width} = useWindowDimensions();
+export const LoginScreen = ({navigation, route}) => {
+  const [email, setEmail] = useState(route.params?.email || null);
+  const [password, setPassword] = useState(null);
+  const [visible, setVisible] = useState(true);
+
+  const {setError, setErrorMessage, error} = useContext(CreateErrorContext);
+
+  const handleLogin = () => {
+    //reset error state
+    setError(false);
+    setErrorMessage(null);
+
+    if (!email) {
+      setError(true);
+      setErrorMessage('Email field is missing');
+
+      return;
+    }
+
+    if (!password) {
+      setError(true);
+      setErrorMessage('Password field is missing');
+
+      return;
+    }
+
+    navigation.navigate('Splash');
+  };
+
+  const {width, height} = useWindowDimensions();
 
   const Size = 27;
+  const iconName = visible ? 'eye-off' : 'eye';
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: {bgLight}}}>
       <StatusBar barStyle="dark-content" backgroundColor={bgLight} />
+      {error && <ErrorComponent />}
+
       <ScrollView
         contentContainerStyle={{
           backgroundColor: bgLight,
-          flex: 1,
+          minHeight: '100%',
           paddingVertical: 40,
         }}>
         <View
@@ -92,7 +125,7 @@ export const LoginScreen = ({navigation}) => {
             </TouchableOpacity>
             <TextInput
               placeholderTextColor={colorDisabled}
-              placeholder="firstname"
+              placeholder="email"
               style={{
                 borderBottomWidth: 1,
                 borderBottomColor: colorDisabled,
@@ -102,7 +135,8 @@ export const LoginScreen = ({navigation}) => {
                 color: lightDark,
                 paddingLeft: 40,
               }}
-              // onFocus={() => onInputFocus('firstname')}
+              defaultValue={email}
+              onChangeText={mailText => setEmail(mailText)}
             />
           </View>
 
@@ -121,11 +155,19 @@ export const LoginScreen = ({navigation}) => {
                 color: lightDark,
                 paddingLeft: 40,
               }}
+              defaultValue={password}
+              onChangeText={passwd => setPassword(passwd)}
+              secureTextEntry={visible}
             />
+            <TouchableOpacity
+              style={{position: 'absolute', right: 0, top: 16}}
+              onPress={() => setVisible(!visible)}>
+              <Ionicons name={iconName} color={colorDisabled} size={Size} />
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            onPress={() => navigation.navigate('Splash')}
+            onPress={handleLogin}
             style={{
               alignSelf: 'center',
               padding: 15,

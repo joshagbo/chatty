@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
-  useWindowDimensions,
 } from 'react-native';
 import {
   bgLight,
@@ -21,8 +20,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 export const RegistrationScreen = ({navigation}) => {
-  const {height, width} = useWindowDimensions();
-
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: bgLight}}>
       <StatusBar barStyle="dark-content" backgroundColor={bgLight} />
@@ -30,6 +27,7 @@ export const RegistrationScreen = ({navigation}) => {
         contentContainerStyle={{
           backgroundColor: bgLight,
           paddingBottom: 40,
+          minHeight: '100%',
         }}>
         <View
           style={{
@@ -75,7 +73,7 @@ export const RegistrationScreen = ({navigation}) => {
               fontWeight: 'bold',
               color: textDark,
             }}>
-            Welcome To Chatty!
+            Chatty!
           </Text>
           <Text
             style={{
@@ -84,7 +82,7 @@ export const RegistrationScreen = ({navigation}) => {
               fontSize: 18,
               fontWeight: '400',
             }}>
-            A Next generation chat application
+            Build Connection to your world
           </Text>
         </View>
 

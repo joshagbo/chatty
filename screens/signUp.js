@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -22,26 +22,67 @@ import {
 } from '../utils/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {CreateErrorContext} from '../feature/context';
+import {ErrorComponent} from '../components/errors';
 
 export const SignUpScreen = ({navigation}) => {
-  const [firstnameActive, setFirstnameActive] = useState(false);
-  const [lastnameActive, setLastnameActive] = useState(false);
-  const [usernameActive, setUsernameActive] = useState(false);
-  const [emailActive, setEmailActive] = useState(false);
-  const [passwordActive, setPasswordActive] = useState(false);
+  const [firstname, setFirstname] = useState(null);
+  const [lastname, setLastname] = useState(null);
+  const [username, setUsername] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [password, setPassword] = useState(null);
+  const [visible, setVisible] = useState(true);
 
-  const {width, height} = useWindowDimensions();
+  const {error, setError, setErrorMessage} = useContext(CreateErrorContext);
+  const {width} = useWindowDimensions();
   const Size = 27;
 
-  const onInputFocus = input => {};
+  const iconName = visible ? 'eye-off' : 'eye';
+
+  const handleRegister = () => {
+    //reset error state
+    setError(false);
+    setErrorMessage(null);
+
+    if (!firstname) {
+      setError(true);
+      setErrorMessage('Firstname is required');
+      return;
+    }
+
+    if (!lastname) {
+      setError(true);
+      setErrorMessage('Lastname is required');
+      return;
+    }
+    if (!username) {
+      setError(true);
+      setErrorMessage('Username field is required');
+      return;
+    }
+
+    if (!email) {
+      setError(true);
+      setErrorMessage('Email field is required');
+      return;
+    }
+
+    if (!password) {
+      setError(true);
+      setErrorMessage('Password field is required');
+      return;
+    }
+
+    navigation.navigate('Login', {email});
+  };
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: {bgLight}}}>
       <StatusBar barStyle="dark-content" backgroundColor={bgLight} />
+      {error && <ErrorComponent />}
       <ScrollView
         contentContainerStyle={{
           backgroundColor: bgLight,
-
           paddingVertical: 40,
         }}>
         <View
@@ -106,7 +147,8 @@ export const SignUpScreen = ({navigation}) => {
                 color: lightDark,
                 paddingLeft: 40,
               }}
-              onFocus={() => onInputFocus('firstname')}
+              defaultValue={firstname}
+              onChangeText={fName => setFirstname(fName)}
             />
           </View>
           <View style={styles.fieldContainer}>
@@ -124,6 +166,8 @@ export const SignUpScreen = ({navigation}) => {
                 color: lightDark,
                 paddingLeft: 40,
               }}
+              defaultValue={lastname}
+              onChangeText={lName => setLastname(lName)}
             />
           </View>
           <View style={styles.fieldContainer}>
@@ -146,6 +190,8 @@ export const SignUpScreen = ({navigation}) => {
                 color: lightDark,
                 paddingLeft: 40,
               }}
+              defaultValue={username}
+              onChangeText={uName => setUsername(uName)}
             />
           </View>
 
@@ -169,6 +215,8 @@ export const SignUpScreen = ({navigation}) => {
                 color: lightDark,
                 paddingLeft: 40,
               }}
+              defaultValue={email}
+              onChangeText={mail => setEmail(mail)}
             />
           </View>
           <View style={styles.fieldContainer}>
@@ -186,10 +234,18 @@ export const SignUpScreen = ({navigation}) => {
                 paddingLeft: 40,
               }}
               placeholder="password"
+              defaultValue={password}
+              onChangeText={passwd => setPassword(passwd)}
+              secureTextEntry={visible}
             />
+            <TouchableOpacity
+              style={{position: 'absolute', right: 0, top: 16}}
+              onPress={() => setVisible(!visible)}>
+              <Ionicons name={iconName} color={colorDisabled} size={Size} />
+            </TouchableOpacity>
           </View>
           <TouchableOpacity
-            onPress={() => navigation.navigate('Splash')}
+            onPress={handleRegister}
             style={{
               alignSelf: 'center',
               padding: 15,

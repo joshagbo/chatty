@@ -53,11 +53,6 @@ const slides = [
 ];
 
 export const AppIntro = ({navigation}) => {
-  const isDone = () => {
-    // Alert.alert('You are done here!');
-    navigation.navigate('Splash');
-  };
-
   const {height, width} = useWindowDimensions();
 
   const platformNextIcon =
@@ -114,7 +109,6 @@ export const AppIntro = ({navigation}) => {
       <AppIntroSlider
         renderItem={renderItems}
         data={slides}
-        onDone={isDone}
         renderDoneButton={renderDoneButton}
         showNextButton={true}
         showSkipButton={true}
