@@ -1,4 +1,4 @@
-import React, {useState, useContext} from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -17,51 +17,84 @@ import {
   bgPrimary,
   colorFb,
   colorGoogle,
+  Size,
   colorDisabled,
 } from '../utils/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {ErrorComponent} from '../components/errors';
-import {CreateErrorContext} from '../feature/context';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import {useSelector, useDispatch} from 'react-redux';
+import {setError} from '../feature/reducers/errorReducer';
+import {onSuccess} from '../feature/reducers/successReducer';
+import {SuccessComponent} from '../components/success';
 
 export const LoginScreen = ({navigation, route}) => {
   const [email, setEmail] = useState(route.params?.email || null);
   const [password, setPassword] = useState(null);
   const [visible, setVisible] = useState(true);
 
-  const {setError, setErrorMessage, error} = useContext(CreateErrorContext);
+  // const {setError, setErrorMessage, error} = useContext(CreateErrorContext);
+  const {
+    error: {error},
+    success: {success},
+  } = useSelector(state => state);
+
+  const dispatch = useDispatch();
 
   const handleLogin = () => {
-    //reset error state
-    setError(false);
-    setErrorMessage(null);
-
     if (!email) {
-      setError(true);
-      setErrorMessage('Email field is missing');
-
+      dispatch(
+        setError({
+          isError: true,
+          message: 'Email field is missing',
+        }),
+      );
       return;
     }
 
     if (!password) {
-      setError(true);
-      setErrorMessage('Password field is missing');
-
+      dispatch(
+        setError({
+          isError: true,
+          message: 'Password field is missing',
+        }),
+      );
       return;
     }
 
-    navigation.navigate('Splash');
+    dispatch(
+      onSuccess({
+        isSuccess: true,
+        successMessage: 'Login Successful',
+      }),
+    );
+
+    setTimeout(
+      () =>
+        dispatch(
+          onSuccess({
+            successMessage: 'Logging you in...',
+            isSuccess: true,
+          }),
+        ),
+      3500,
+    );
+
+    setTimeout(() => navigation.navigate('Splash'), 7500);
   };
 
-  const {width, height} = useWindowDimensions();
+  const {width} = useWindowDimensions();
 
-  const Size = 27;
   const iconName = visible ? 'eye-off' : 'eye';
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: {bgLight}}}>
       <StatusBar barStyle="dark-content" backgroundColor={bgLight} />
-      {error && <ErrorComponent />}
+      {error.isError && <ErrorComponent message={error.message} />}
+      {success.isSuccess && (
+        <SuccessComponent message={success.successMessage} />
+      )}
 
       <ScrollView
         contentContainerStyle={{
@@ -174,7 +207,7 @@ export const LoginScreen = ({navigation, route}) => {
               width: width - 100,
               borderRadius: 50,
               backgroundColor: bgPrimary,
-              marginTop: 40,
+              marginTop: 20,
             }}>
             <Text
               style={{
@@ -186,7 +219,9 @@ export const LoginScreen = ({navigation, route}) => {
               Login Now
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={{alignSelf: 'center'}}>
+          <TouchableOpacity
+            style={{alignSelf: 'center'}}
+            onPress={() => navigation.navigate('Password-reset')}>
             <Text
               style={{
                 fontSize: 16,
@@ -238,8 +273,8 @@ export const LoginScreen = ({navigation, route}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <Ionicons
-              name="logo-linkedin"
+            <FontAwesome5
+              name="linkedin-in"
               color={bgLight}
               size={22}
               style={{borderRadius: 50}}

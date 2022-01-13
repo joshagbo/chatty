@@ -15,9 +15,11 @@ import {
   bgPrimary,
   colorFb,
   colorGoogle,
+  Size,
 } from '../utils/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 export const RegistrationScreen = ({navigation}) => {
   return (
@@ -148,7 +150,7 @@ export const RegistrationScreen = ({navigation}) => {
             marginTop: 10,
           }}>
           <TouchableOpacity>
-            <MaterialIcons name="facebook" color={colorFb} size={43} />
+            <MaterialIcons name="facebook" color={colorFb} size={Size * 1.4} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -165,7 +167,7 @@ export const RegistrationScreen = ({navigation}) => {
             <Ionicons
               name="logo-google"
               color={bgLight}
-              size={24}
+              size={Size - 5}
               style={{borderRadius: 50}}
             />
           </TouchableOpacity>
@@ -178,10 +180,10 @@ export const RegistrationScreen = ({navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <Ionicons
-              name="logo-linkedin"
+            <FontAwesome5
+              name="linkedin-in"
               color={bgLight}
-              size={24}
+              size={Size - 5}
               style={{borderRadius: 50}}
             />
           </TouchableOpacity>

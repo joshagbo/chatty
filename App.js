@@ -1,18 +1,18 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-
-import {ContextProvider} from './feature/context';
+import {Provider} from 'react-redux';
+import store from './feature/store';
 import {AppStack} from './navigators/stack';
 
 // const bgPrimary = '#4D4A95';
 
 const App = () => {
   return (
-    <ContextProvider>
+    <Provider store={store}>
       <NavigationContainer>
         <AppStack />
       </NavigationContainer>
-    </ContextProvider>
+    </Provider>
   );
 };
 

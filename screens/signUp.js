@@ -1,4 +1,4 @@
-import React, {useState, useContext} from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
-  useWindowDimensions,
   TextInput,
   StyleSheet,
 } from 'react-native';
@@ -19,11 +18,15 @@ import {
   colorFb,
   colorGoogle,
   colorDisabled,
+  Size,
 } from '../utils/colors';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {CreateErrorContext} from '../feature/context';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {ErrorComponent} from '../components/errors';
+import {useSelector, useDispatch} from 'react-redux';
+import {setError} from '../feature/reducers/errorReducer';
 
 export const SignUpScreen = ({navigation}) => {
   const [firstname, setFirstname] = useState(null);
@@ -33,43 +36,60 @@ export const SignUpScreen = ({navigation}) => {
   const [password, setPassword] = useState(null);
   const [visible, setVisible] = useState(true);
 
-  const {error, setError, setErrorMessage} = useContext(CreateErrorContext);
-  const {width} = useWindowDimensions();
-  const Size = 27;
+  const {
+    error: {error},
+  } = useSelector(state => state);
+  const dispatch = useDispatch();
 
   const iconName = visible ? 'eye-off' : 'eye';
 
   const handleRegister = () => {
-    //reset error state
-    setError(false);
-    setErrorMessage(null);
-
     if (!firstname) {
-      setError(true);
-      setErrorMessage('Firstname is required');
+      dispatch(
+        setError({
+          isError: true,
+          message: 'Firstname is required',
+        }),
+      );
       return;
     }
 
     if (!lastname) {
-      setError(true);
-      setErrorMessage('Lastname is required');
+      dispatch(
+        setError({
+          isError: true,
+          message: 'Lastname is required',
+        }),
+      );
       return;
     }
     if (!username) {
-      setError(true);
-      setErrorMessage('Username field is required');
+      dispatch(
+        setError({
+          isError: true,
+          message: 'Username is required',
+        }),
+      );
       return;
     }
 
     if (!email) {
-      setError(true);
-      setErrorMessage('Email field is required');
+      dispatch(
+        setError({
+          isError: true,
+          message: 'Email is required',
+        }),
+      );
       return;
     }
 
     if (!password) {
-      setError(true);
-      setErrorMessage('Password field is required');
+      dispatch(
+        setError({
+          isError: true,
+          message: 'Password is required',
+        }),
+      );
       return;
     }
 
@@ -79,11 +99,11 @@ export const SignUpScreen = ({navigation}) => {
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: {bgLight}}}>
       <StatusBar barStyle="dark-content" backgroundColor={bgLight} />
-      {error && <ErrorComponent />}
+      {error.isError && <ErrorComponent message={error.message} />}
       <ScrollView
         contentContainerStyle={{
           backgroundColor: bgLight,
-          paddingVertical: 40,
+          paddingVertical: 20,
         }}>
         <View
           style={{
@@ -153,7 +173,11 @@ export const SignUpScreen = ({navigation}) => {
           </View>
           <View style={styles.fieldContainer}>
             <TouchableOpacity style={{position: 'absolute', left: 0, top: 16}}>
-              <Ionicons name="person" color={colorDisabled} size={Size} />
+              <MaterialIcons
+                name="person-outline"
+                color={colorDisabled}
+                size={Size}
+              />
             </TouchableOpacity>
             <TextInput
               placeholderTextColor={colorDisabled}
@@ -249,10 +273,10 @@ export const SignUpScreen = ({navigation}) => {
             style={{
               alignSelf: 'center',
               padding: 15,
-              width: width - 100,
+              width: '100%',
               borderRadius: 50,
               backgroundColor: bgPrimary,
-              marginTop: 40,
+              marginTop: 20,
             }}>
             <Text
               style={{
@@ -264,6 +288,22 @@ export const SignUpScreen = ({navigation}) => {
               SignUp Now
             </Text>
           </TouchableOpacity>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: '500',
+              color: lightDark,
+              marginLeft: 20,
+              marginTop: 10,
+              textAlign: 'center',
+              width: '80%',
+              alignSelf: 'center',
+            }}>
+            By registering, you acknowledge and agree to our{' '}
+            <Text style={{textDecorationLine: 'underline'}}>
+              Terms of use and privacy policy
+            </Text>
+          </Text>
         </View>
 
         <View
@@ -274,7 +314,7 @@ export const SignUpScreen = ({navigation}) => {
             marginTop: 10,
           }}>
           <TouchableOpacity>
-            <MaterialIcons name="facebook" color={colorFb} size={33} />
+            <MaterialIcons name="facebook" color={colorFb} size={Size + 7} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -288,10 +328,10 @@ export const SignUpScreen = ({navigation}) => {
               marginHorizontal: 8,
               marginRight: 10,
             }}>
-            <Ionicons
-              name="logo-google"
+            <MaterialCommunityIcons
+              name="google"
               color={bgLight}
-              size={22}
+              size={Size - 5}
               style={{borderRadius: 50}}
             />
           </TouchableOpacity>
@@ -304,10 +344,10 @@ export const SignUpScreen = ({navigation}) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <Ionicons
-              name="logo-linkedin"
+            <FontAwesome5
+              name="linkedin-in"
               color={bgLight}
-              size={22}
+              size={Size - 7}
               style={{borderRadius: 50}}
             />
           </TouchableOpacity>

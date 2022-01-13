@@ -1,13 +1,12 @@
 import React, {useRef, useEffect} from 'react';
 import {
   Animated,
-  Dimensions,
   StatusBar,
   SafeAreaView,
   useWindowDimensions,
 } from 'react-native';
 
-import {Categories} from './categories';
+import {Categories} from '../components/categories';
 import chatIcon from '../assets/rounded-chat.png';
 import {bgPrimary} from '../utils/colors';
 

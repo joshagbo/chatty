@@ -7,11 +7,11 @@ import {
 } from 'react-native';
 
 import {useDispatch, useSelector} from 'react-redux';
-import {setError} from '../feature/reducers/errorReducer';
-import {bgLight, colorGoogle} from '../utils/colors';
+import {onSuccess} from '../feature/reducers/successReducer';
+import {bgLight, colorSuccess} from '../utils/colors';
 
-export const ErrorComponent = ({message}) => {
-  const {error} = useSelector(state => state.error);
+export const SuccessComponent = ({message}) => {
+  const {success} = useSelector(state => state.success);
   const dispatch = useDispatch();
 
   const {height, width} = useWindowDimensions();
@@ -54,20 +54,29 @@ export const ErrorComponent = ({message}) => {
       ]).start();
     }, 8000);
   });
-  //clear error state in 8.10 sec
-  setTimeout(() => dispatch(setError({isError: false, message: null})), 8010);
 
+  //clear success state in 8.10 sec
+  setTimeout(
+    () =>
+      dispatch(
+        onSuccess({
+          successMessage: null,
+          isSuccess: false,
+        }),
+      ),
+    8010,
+  );
   return (
     <SafeAreaView>
       <StatusBar
         barStyle="dark-content"
-        backgroundColor={error.isError ? colorGoogle : bgLight}
+        backgroundColor={success.isSuccess ? colorSuccess : bgLight}
       />
       <Animated.View
         style={{
           height: 60,
           width,
-          backgroundColor: colorGoogle,
+          backgroundColor: colorSuccess,
           paddingTop: 10,
           position: 'absolute',
           top: 0,
@@ -84,6 +93,7 @@ export const ErrorComponent = ({message}) => {
             color: bgLight,
             textAlign: 'center',
             marginTop: 5,
+            color: bgLight,
             transform: [{translateX: animateRight}],
           }}>
           {message}

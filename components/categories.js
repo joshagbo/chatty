@@ -28,6 +28,12 @@ const categoryList = [
     tags: [],
   },
   {
+    title: 'BlockChain',
+    key: 'blockchain',
+    poster: require('../assets/blockchain.jpg'),
+    tags: [],
+  },
+  {
     title: 'Aria Photography',
     key: 'Aria Photography',
     poster: require('../assets/aria_photography.jpg'),
@@ -91,7 +97,7 @@ const ListHeaderComponent = () => (
         color: dark,
         textAlign: 'center',
       }}>
-      Pick a interest. Join the discussion
+      Pick interests. Join the discussion
     </Text>
   </View>
 );
