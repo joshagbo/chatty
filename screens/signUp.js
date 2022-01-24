@@ -39,6 +39,7 @@ export const SignupErrorComponent = ({message, isError}) => {
   const moveOutAnim = useRef(new Animated.Value(0)).current;
   const animateRight = useRef(new Animated.Value(-200)).current;
 
+  ('hello');
   useEffect(() => {
     Animated.parallel([
       Animated.timing(moveInAnim, {
