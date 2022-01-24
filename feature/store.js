@@ -1,10 +1,10 @@
 import {configureStore} from '@reduxjs/toolkit';
-import userReducer from './reducers/userReducer';
-import errorReducer from './reducers/errorReducer';
-import successReducer from './reducers/successReducer';
+import appGlobalReducer from './reducers/appGlobalReducer';
 
 const store = configureStore({
-  reducer: {user: userReducer, error: errorReducer, success: successReducer},
+  reducer: {
+    globals: appGlobalReducer,
+  },
 });
 
 export default store;

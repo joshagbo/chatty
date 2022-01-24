@@ -7,17 +7,21 @@ import {
 } from 'react-native';
 
 import {Categories} from '../components/categories';
-import chatIcon from '../assets/rounded-chat.png';
-import {bgPrimary} from '../utils/colors';
+import chatIcon from '../assets/images/rounded-chat.png';
+import {bgLight, bgPrimary} from '../utils/colors';
+import {deviceTypeAndroid} from '../utils/platforms';
 
 const bgColor = '#4D4A95';
 
-const SplashScreenComponent = () => {
+const SplashScreenComponent = ({navigation}) => {
+  /*
+  *
+  //initial animationn state
+  *
+  */
   //translate  log&title along Y-axis
   const startAnimation = useRef(new Animated.Value(0)).current;
   const startHomeAnimation = useRef(new Animated.Value(0)).current;
-
-  const {height, width} = useWindowDimensions();
 
   //scale logo
   const scaleLogo = useRef(new Animated.Value(1)).current;
@@ -42,13 +46,12 @@ const SplashScreenComponent = () => {
   const startLogoScale = useRef(new Animated.Value(5)).current;
   const startTitleScale = useRef(new Animated.Value(2)).current;
   const onScaleFade = useRef(new Animated.Value(0)).current;
-  // const animImageMode = useRef(new Animated.Value(0)).current;
+
+  const {height, width} = useWindowDimensions();
 
   useEffect(() => {
     //start animation immediately
-
     Animated.parallel([
-      // Animated.delay(2000),
       Animated.timing(startLogoScale, {
         toValue: 1,
         useNativeDriver: true,
@@ -65,17 +68,17 @@ const SplashScreenComponent = () => {
       }),
     ]).start();
 
-    //start animation after 500ms
+    //start animation after 1s
     setTimeout(() => {
-      //parallel animation
       Animated.parallel([
         Animated.timing(startAnimation, {
-          toValue: -height + 65,
+          toValue:
+            deviceTypeAndroid === 'Handset' ? -height + 65 : -height + 100,
           useNativeDriver: true,
         }),
 
         Animated.timing(scaleLogo, {
-          toValue: 0.4,
+          toValue: deviceTypeAndroid === 'Handset' ? 0.4 : 0.5,
           useNativeDriver: true,
         }),
 
@@ -86,8 +89,8 @@ const SplashScreenComponent = () => {
 
         Animated.timing(moveLogo, {
           toValue: {
-            x: width - 20,
-            y: height + 160,
+            y: deviceTypeAndroid === 'Handset' ? height + 165 : height - 50,
+            x: deviceTypeAndroid === 'Handset' ? width - 50 : width - 200,
           },
           useNativeDriver: true,
         }),
@@ -95,7 +98,10 @@ const SplashScreenComponent = () => {
         Animated.timing(moveTitle, {
           toValue: {
             x: 0,
-            y: height / 2 - 100,
+            y:
+              deviceTypeAndroid === 'Handset'
+                ? height / 2 - 90
+                : height / 2 - 120,
           },
           useNativeDriver: true,
         }),
@@ -115,7 +121,7 @@ const SplashScreenComponent = () => {
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: bgColor}}>
-      <StatusBar barStyle="dark-content" backgroundColor={bgPrimary} />
+      <StatusBar barStyle="light-content" backgroundColor={bgPrimary} />
       <Animated.View
         style={{
           position: 'absolute',
@@ -152,9 +158,9 @@ const SplashScreenComponent = () => {
           />
           <Animated.Text
             style={{
-              fontSize: 22,
-              fontWeight: '600',
-              color: '#ddd',
+              fontSize: deviceTypeAndroid === 'Handset' ? 22 : 35,
+              fontFamily: 'Outfit-Bold',
+              color: bgLight,
               opacity: onScaleFade,
               transform: [
                 {scale: startTitleScale},
@@ -179,11 +185,11 @@ const SplashScreenComponent = () => {
           bottom: 0,
           zIndex: 0,
           marginBottom: 65,
-          backgroundColor: '#fff',
+          backgroundColor: bgLight,
           opacity: fadeInAnimation,
           transform: [{translateY: startHomeAnimation}],
         }}>
-        <Categories />
+        <Categories navigation={navigation} />
       </Animated.View>
     </SafeAreaView>
   );

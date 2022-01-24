@@ -7,11 +7,13 @@ import {
 } from 'react-native';
 
 import {useDispatch, useSelector} from 'react-redux';
-import {setError} from '../feature/reducers/errorReducer';
-import {bgLight, colorGoogle} from '../utils/colors';
+import {setError} from '../feature/reducers/appGlobalReducer';
+import {bgLight, colorGoogle, Size} from '../utils/colors';
+import {deviceTypeAndroid} from '../utils/platforms';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 export const ErrorComponent = ({message}) => {
-  const {error} = useSelector(state => state.error);
+  const {error} = useSelector(state => state.globals);
   const dispatch = useDispatch();
 
   const {height, width} = useWindowDimensions();
@@ -54,41 +56,54 @@ export const ErrorComponent = ({message}) => {
       ]).start();
     }, 8000);
   });
+
   //clear error state in 8.10 sec
-  setTimeout(() => dispatch(setError({isError: false, message: null})), 8010);
+  setTimeout(
+    () => dispatch(setError({isError: false, message: null, type: 'CLEANUP'})),
+    8010,
+  );
 
   return (
-    <SafeAreaView>
+    <>
       <StatusBar
         barStyle="dark-content"
         backgroundColor={error.isError ? colorGoogle : bgLight}
+        translucent={false}
       />
-      <Animated.View
-        style={{
-          height: 60,
-          width,
-          backgroundColor: colorGoogle,
-          paddingTop: 10,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          zIndex: 10,
-          transform: [{translateY: moveInAnim}, {translateY: moveOutAnim}],
-          opacity: fadeIn,
-          opacity: fadeOut,
-        }}>
-        <Animated.Text
+      <SafeAreaView>
+        <Animated.View
           style={{
-            fontSize: 18,
-            fontWeight: '500',
-            color: bgLight,
-            textAlign: 'center',
-            marginTop: 5,
-            transform: [{translateX: animateRight}],
+            height: 60,
+            width,
+            backgroundColor: colorGoogle,
+            paddingTop: 10,
+            position: 'absolute',
+            alignItems: 'center',
+            justifyContent: 'center',
+            top: 0,
+            left: 0,
+            zIndex: 10,
+            transform: [{translateY: moveInAnim}, {translateY: moveOutAnim}],
+            opacity: fadeIn,
+            opacity: fadeOut,
           }}>
-          {message}
-        </Animated.Text>
-      </Animated.View>
-    </SafeAreaView>
+          <Animated.Text
+            style={{
+              fontSize: deviceTypeAndroid === 'Handset' ? 18 : 24,
+              fontFamily: 'Outfit-Medium',
+              color: bgLight,
+              textAlign: 'center',
+              transform: [{translateX: animateRight}],
+            }}>
+            <FontAwesome5
+              name="info-circle"
+              size={deviceTypeAndroid === 'Handset' ? Size / 1.8 : Size / 1.2}
+              color={bgLight}
+            />{' '}
+            {message}
+          </Animated.Text>
+        </Animated.View>
+      </SafeAreaView>
+    </>
   );
 };

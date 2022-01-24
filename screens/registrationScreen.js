@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
+  StyleSheet,
 } from 'react-native';
 import {
   bgLight,
@@ -20,95 +21,45 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import {deviceTypeAndroid} from '../utils/platforms';
 
 export const RegistrationScreen = ({navigation}) => {
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: bgLight}}>
       <StatusBar barStyle="dark-content" backgroundColor={bgLight} />
       <ScrollView
-        contentContainerStyle={{
-          backgroundColor: bgLight,
-          paddingBottom: 40,
-          minHeight: '100%',
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: 20,
-            marginHorizontal: 20,
-          }}>
+        contentContainerStyle={styles.contentsContainer}
+        scrollEnabled={true}>
+        <View style={styles.logoContainer}>
           <Image
-            source={require('../assets/rounded-chat.png')}
-            style={{
-              width: 40,
-              height: 40,
-              marginVertical: 40,
-            }}
+            source={require('../assets/images/rounded-chat.png')}
+            style={styles.logo}
           />
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: '600',
-              marginLeft: 8,
-              color: lightDark,
-            }}>
-            Chatty
-          </Text>
+          <Text style={styles.logoText}>Chatty</Text>
         </View>
-
-        <Image
-          source={require('../assets/connect_world.png')}
-          style={{
-            width: '100%',
-            height: 250,
-            resizeMode: 'cover',
-            marginBottom: 40,
-          }}
-        />
-
+        <View>
+          <Image
+            source={require('../assets/images/connect_world.png')}
+            style={styles.bannerImage}
+          />
+        </View>
         <View style={{marginBottom: 40}}>
-          <Text
-            style={{
-              textAlign: 'center',
-              fontSize: 24,
-              fontWeight: 'bold',
-              color: textDark,
-            }}>
-            Chatty!
-          </Text>
-          <Text
-            style={{
-              textAlign: 'center',
-              color: lightDark,
-              fontSize: 18,
-              fontWeight: '400',
-            }}>
-            Build Connection to your world
-          </Text>
+          <Text style={styles.pageTitle}>Chatty!</Text>
+          <Text style={styles.description}>Build Connection to your world</Text>
         </View>
 
-        <View
-          style={{
-            flexDirection: 'row',
-            marginVertical: 10,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
+        <View style={styles.form}>
           <TouchableOpacity
             onPress={() => navigation.navigate('Login')}
-            style={{
-              backgroundColor: bgPrimary,
-              paddingVertical: 10,
-              borderRadius: 50,
-              paddingHorizontal: 20,
-              marginRight: 20,
-            }}>
+            style={styles.Button}>
             <Text
               style={{
                 color: bgLight,
-                fontSize: 18,
-                fontWeight: '500',
+                fontSize: deviceTypeAndroid === 'Handset' ? 18 : 24,
+                fontFamily:
+                  deviceTypeAndroid === 'Handset'
+                    ? 'Outfit-Medium'
+                    : 'Outfit-Bold',
               }}>
               Login
             </Text>
@@ -116,74 +67,48 @@ export const RegistrationScreen = ({navigation}) => {
           <TouchableOpacity
             onPress={() => navigation.navigate('Signup')}
             style={{
-              paddingVertical: 10,
-              borderRadius: 50,
-              paddingHorizontal: 20,
+              ...styles.Button,
+              backgroundColor: 'transparent',
               borderWidth: 1,
+              borderColor: textDark,
             }}>
             <Text
               style={{
-                color: textDark,
-                fontSize: 18,
-                fontWeight: '500',
+                color: lightDark,
+                fontSize: deviceTypeAndroid === 'Handset' ? 18 : 24,
+                fontFamily:
+                  deviceTypeAndroid === 'Handset'
+                    ? 'Outfit-Medium'
+                    : 'Outfit-Bold',
               }}>
               SignUp
             </Text>
           </TouchableOpacity>
         </View>
 
-        <Text
-          style={{
-            fontSize: 18,
-            textAlign: 'center',
-            fontWeight: '500',
-            marginTop: 40,
-            color: lightDark,
-          }}>
-          Or via social media
-        </Text>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginTop: 10,
-          }}>
+        <Text style={styles.socialTitle}>Or via social media</Text>
+        <View style={styles.socialContainer}>
           <TouchableOpacity>
-            <MaterialIcons name="facebook" color={colorFb} size={Size * 1.4} />
+            <MaterialIcons
+              name="facebook"
+              color={colorFb}
+              size={deviceTypeAndroid === 'Handset' ? Size * 1.4 : Size * 2}
+            />
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 50,
-              backgroundColor: colorGoogle,
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginHorizontal: 8,
-              marginRight: 10,
-            }}>
+          <TouchableOpacity style={styles.socialIcon}>
             <Ionicons
               name="logo-google"
               color={bgLight}
-              size={Size - 5}
+              size={deviceTypeAndroid === 'Handset' ? Size - 5 : Size}
               style={{borderRadius: 50}}
             />
           </TouchableOpacity>
           <TouchableOpacity
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 50,
-              backgroundColor: bgPrimary,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
+            style={{...styles.socialIcon, backgroundColor: bgPrimary}}>
             <FontAwesome5
               name="linkedin-in"
               color={bgLight}
-              size={Size - 5}
+              size={deviceTypeAndroid === 'Handset' ? Size - 5 : Size}
               style={{borderRadius: 50}}
             />
           </TouchableOpacity>
@@ -192,3 +117,87 @@ export const RegistrationScreen = ({navigation}) => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  contentsContainer: {
+    backgroundColor: bgLight,
+    paddingBottom: 20,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    marginLeft: 20,
+  },
+  logo: {
+    width: deviceTypeAndroid === 'Handset' ? 40 : 60,
+    height: deviceTypeAndroid === 'Handset' ? 40 : 60,
+  },
+  logoText: {
+    fontSize: deviceTypeAndroid === 'Handset' ? 24 : 30,
+    fontFamily: 'Outfit-Bold',
+    marginLeft: 8,
+    color: textDark,
+  },
+  bannerImage: {
+    width: '100%',
+    height: deviceTypeAndroid === 'Handset' ? 300 : 600,
+    resizeMode: 'contain',
+    marginTop: 20,
+    alignSelf: 'center',
+  },
+
+  pageTitle: {
+    textAlign: 'center',
+    fontSize: deviceTypeAndroid === 'Handset' ? 24 : 30,
+    fontFamily: 'Outfit-Bold',
+    color: textDark,
+    marginBottom: 5,
+  },
+  description: {
+    textAlign: 'center',
+    color: lightDark,
+    fontSize: deviceTypeAndroid === 'Handset' ? 18 : 24,
+    fontFamily: 'Outfit-Medium',
+  },
+  form: {
+    flexDirection: 'row',
+    marginVertical: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  socialTitle: {
+    fontSize: deviceTypeAndroid === 'Handset' ? 18 : 24,
+    fontFamily: 'Outfit',
+    textAlign: 'center',
+    fontWeight: '500',
+    marginTop: 40,
+    color: lightDark,
+    marginBottom: 10,
+  },
+  Button: {
+    backgroundColor: bgPrimary,
+    width: deviceTypeAndroid === 'Handset' ? 100 : 150,
+    height: deviceTypeAndroid === 'Handset' ? 50 : 70,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 20,
+  },
+  socialIcon: {
+    width: deviceTypeAndroid === 'Handset' ? 36 : 45,
+    height: deviceTypeAndroid === 'Handset' ? 36 : 45,
+    borderRadius: 50,
+    backgroundColor: colorGoogle,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 10,
+    marginRight: 10,
+  },
+  socialContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+});

@@ -8,6 +8,8 @@ import {SignUpScreen} from '../screens/signUp';
 import SplashScreenComponent from '../screens/splashScreen';
 import {PasswordResetScreen} from '../screens/passwordReset';
 import {ResetScreen} from '../screens/resetScreen';
+import {DiscussionDetails} from '../screens/discussionDetails';
+import {SuccessConfirmation} from '../screens/successConfirmation';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,5 +22,7 @@ export const AppStack = () => (
     <Stack.Screen name="Splash" component={SplashScreenComponent} />
     <Stack.Screen name="Password-reset" component={PasswordResetScreen} />
     <Stack.Screen name="Reset" component={ResetScreen} />
+    <Stack.Screen name="Discussion" component={DiscussionDetails} />
+    <Stack.Screen name="Confirmed" component={SuccessConfirmation} />
   </Stack.Navigator>
 );

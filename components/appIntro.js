@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -7,117 +7,76 @@ import {
   Image,
   Platform,
   TouchableOpacity,
-  useWindowDimensions,
+  Animated,
 } from 'react-native';
 import AppIntroSlider from 'react-native-app-intro-slider';
-const bgPrimary = '#4D4A95';
-
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
-const slides = [
-  {
-    key: 'welcome',
-    title: 'welcome, Chatty!',
-    text: 'A next-gen chat application. Click Next to begin',
-    image: require('../assets/welcome.png'),
-    backgroundColor: bgPrimary,
-  },
-  {
-    key: 'vr',
-    title: 'Metaverse',
-    text: 'Join the discussion and learn then nuances of Virtual Reality',
-    image: require('../assets/Virtual_reality.png'),
-    backgroundColor: bgPrimary,
-  },
-  {
-    key: 'ai',
-    title: 'Artificial Intelligence',
-    text: 'What do people say about mankind greatest invention. Join the community to learn more',
-    image: require('../assets/Firmware.png'),
-    backgroundColor: bgPrimary,
-  },
-  {
-    key: 'photography',
-    title: 'Arial Photography',
-    text: 'Get the chance to meet other professional and learn the de factor in Arial Photography.',
-    image: require('../assets/Camera.png'),
-    backgroundColor: bgPrimary,
-  },
-  {
-    key: 'climate',
-    title: 'Climate Change',
-    text: 'With the recent rise in sea level and expotential temperature rise. What are scientists and folks saying about climate change',
-    image: require('../assets/among_nature.png'),
-    backgroundColor: bgPrimary,
-  },
-];
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import {bgLight, bgPrimary, Size} from '../utils/colors';
+import {deviceTypeAndroid} from '../utils/platforms';
+import {useSelector} from 'react-redux';
 
 export const AppIntro = ({navigation}) => {
-  const {height, width} = useWindowDimensions();
-
-  const platformNextIcon =
-    // 'chevron-forward';
-    Platform.OS === 'ios' ? 'chevron-forward' : 'arrow-forward';
-
-  const platformDoneIcon =
-    //  'checkmark-done';
-    Platform.OS === 'ios' ? 'checkmark-done' : 'checkmark';
-
-  const Size = 30;
+  const {slides} = useSelector(state => state.globals);
 
   const renderItems = ({item}) => (
-    <View
-      style={{
-        backgroundColor: item.backgroundColor,
-        ...styles.slideContainer,
-      }}>
-      <Text style={{...styles.title, transform: [{translateY: height / 8}]}}>
-        {item.title}
-      </Text>
-      <Image
-        source={item.image}
-        style={{
-          ...styles.image,
-          width: width - 100,
-          height: 240,
-          marginTop: height / 4,
-        }}
-      />
-      <View style={{...styles.textContainer, width: width - 100}}>
-        <Text style={{...styles.text}}>{item.text}</Text>
+    <Animated.View
+      style={[
+        styles.slideContainer,
+        {
+          backgroundColor: item.backgroundColor,
+        },
+      ]}>
+      <Text style={styles.title}>{item.title}</Text>
+      <Image source={item.image} style={styles.image} />
+      <View style={styles.textContainer}>
+        <Text style={styles.text}>{item.text}</Text>
       </View>
-    </View>
+    </Animated.View>
   );
 
-  const renderDoneButton = () => (
-    <TouchableOpacity
-      onPress={() => navigation.navigate('Register')}
-      style={{
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 100,
-        padding: 5,
-        marginRight: 25,
-      }}>
-      <Ionicons name={platformDoneIcon} size={Size} color={'#fff'} />
-    </TouchableOpacity>
-  );
-
+  const onDoneButton = () => {
+    return (
+      <TouchableOpacity
+        onPress={() => navigation.navigate('Register')}
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: 100,
+          padding: 5,
+          marginRight: 25,
+        }}>
+        <FontAwesome5
+          name={Platform.select({
+            android: 'angle-double-right',
+            ios: 'angle-double-right',
+            default: 'angle-double-right',
+          })}
+          size={Platform.select({
+            android: deviceTypeAndroid === 'Handset' ? Size : Size * 1.2,
+            ios: deviceTypeAndroid === 'Handset' ? Size : Size * 1.2,
+            default: deviceTypeAndroid === 'Handset' ? Size : Size * 1.2,
+          })}
+          color={bgLight}
+        />
+      </TouchableOpacity>
+    );
+  };
   return (
     <>
       <StatusBar barStyle="light-contents" backgroundColor={bgPrimary} />
       <AppIntroSlider
         renderItem={renderItems}
         data={slides}
-        renderDoneButton={renderDoneButton}
+        renderDoneButton={onDoneButton}
         showNextButton={true}
         showSkipButton={true}
         showPrevButton={true}
         activeDotStyle={{
-          borderWidth: 5,
-          borderRadius: 2,
-          borderColor: '#fff',
+          borderWidth: 6,
+          borderRadius: 20,
+          borderColor: bgLight,
         }}
+        // ref={ref => (slideRefs = ref)}
       />
     </>
   );
@@ -126,28 +85,34 @@ export const AppIntro = ({navigation}) => {
 const styles = StyleSheet.create({
   slideContainer: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
-    alignItems: 'flex-start',
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: deviceTypeAndroid === 'Handset' ? 24 : 30,
+    fontFamily: 'Outfit-Bold',
     textAlign: 'center',
     color: '#fff',
     textTransform: 'capitalize',
+    paddingBottom: 20,
+    alignItems: 'flex-start',
   },
   image: {
+    height: deviceTypeAndroid === 'Handset' ? '40%' : '50%',
+    width: deviceTypeAndroid === 'Handset' ? '90%' : '80%',
     alignSelf: 'center',
     borderRadius: 15,
-    resizeMode: 'cover',
+    resizeMode: 'contain',
   },
   textContainer: {
+    width: deviceTypeAndroid === 'Handset' ? '90%' : '80%',
     alignSelf: 'center',
     paddingTop: 20,
   },
   text: {
-    color: '#eee',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: deviceTypeAndroid === 'Handset' ? 16 : 24,
+    color: bgLight,
+    fontFamily: 'Outfit-Medium',
     textAlign: 'center',
     textTransform: 'capitalize',
     lineHeight: 24,

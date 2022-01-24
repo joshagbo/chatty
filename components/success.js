@@ -1,17 +1,19 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   SafeAreaView,
   StatusBar,
   useWindowDimensions,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
-
+import {deviceTypeAndroid} from '../utils/platforms';
 import {useDispatch, useSelector} from 'react-redux';
-import {onSuccess} from '../feature/reducers/successReducer';
+import {setSuccess} from '../feature/reducers/appGlobalReducer';
 import {bgLight, colorSuccess} from '../utils/colors';
 
 export const SuccessComponent = ({message}) => {
-  const {success} = useSelector(state => state.success);
+  const [loading, setLoading] = useState(true);
+  const {success} = useSelector(state => state.globals);
   const dispatch = useDispatch();
 
   const {height, width} = useWindowDimensions();
@@ -52,19 +54,20 @@ export const SuccessComponent = ({message}) => {
           useNativeDriver: true,
         }),
       ]).start();
-    }, 8000);
+    }, 6010);
   });
 
-  //clear success state in 8.10 sec
+  //clear success state in 6.10 sec
   setTimeout(
     () =>
       dispatch(
-        onSuccess({
+        setSuccess({
           successMessage: null,
           isSuccess: false,
+          type: 'CLEANUP',
         }),
       ),
-    8010,
+    6010,
   );
   return (
     <SafeAreaView>
@@ -86,18 +89,27 @@ export const SuccessComponent = ({message}) => {
           opacity: fadeIn,
           opacity: fadeOut,
         }}>
-        <Animated.Text
+        <Animated.View
           style={{
-            fontSize: 18,
-            fontWeight: '500',
-            color: bgLight,
-            textAlign: 'center',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
             marginTop: 5,
-            color: bgLight,
-            transform: [{translateX: animateRight}],
           }}>
-          {message}
-        </Animated.Text>
+          <ActivityIndicator size="small" color={bgLight} animating={loading} />
+          <Animated.Text
+            style={{
+              fontSize: deviceTypeAndroid === 'Handset' ? 18 : 24,
+              fontFamily: 'Outfit-Medium',
+              color: bgLight,
+              textAlign: 'center',
+              marginLeft: 5,
+              color: bgLight,
+              transform: [{translateX: animateRight}],
+            }}>
+            {message}
+          </Animated.Text>
+        </Animated.View>
       </Animated.View>
     </SafeAreaView>
   );

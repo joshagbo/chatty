@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -8,27 +8,122 @@ import {
   Image,
   StatusBar,
   TextInput,
+  useWindowDimensions,
   StyleSheet,
+  Animated,
 } from 'react-native';
 import {
   bgLight,
   textDark,
   lightDark,
   bgPrimary,
-  colorFb,
   colorGoogle,
   colorDisabled,
   Size,
 } from '../utils/colors';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import {ErrorComponent} from '../components/errors';
 import {useSelector, useDispatch} from 'react-redux';
-import {setError} from '../feature/reducers/errorReducer';
+import {onRegister, setSuccess} from '../feature/reducers/appGlobalReducer';
+import {deviceTypeAndroid} from '../utils/platforms';
+import {SuccessComponent} from '../components/success';
+
+export const SignupErrorComponent = ({message, isError}) => {
+  const {height, width} = useWindowDimensions();
+  const dispatch = useDispatch();
+
+  const moveInAnim = useRef(new Animated.Value(-200)).current;
+  const fadeIn = useRef(new Animated.Value(0)).current;
+
+  const fadeOut = useRef(new Animated.Value(1)).current;
+  const moveOutAnim = useRef(new Animated.Value(0)).current;
+  const animateRight = useRef(new Animated.Value(-200)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(moveInAnim, {
+        toValue: 0,
+        duration: 20,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeIn, {
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+      Animated.spring(animateRight, {
+        toValue: 0,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    setTimeout(() => {
+      dispatch(
+        onRegister({
+          isError: false,
+        }),
+      );
+      Animated.parallel([
+        Animated.timing(fadeOut, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(moveOutAnim, {
+          toValue: -height,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, 4000);
+  });
+
+  return (
+    <SafeAreaView>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={isError ? colorGoogle : bgLight}
+      />
+      <Animated.View
+        style={{
+          height: 60,
+          width,
+          backgroundColor: colorGoogle,
+          paddingTop: 10,
+          position: 'absolute',
+          alignItems: 'center',
+          justifyContent: 'center',
+          top: 0,
+          left: 0,
+          zIndex: 10,
+          transform: [{translateY: moveInAnim}, {translateY: moveOutAnim}],
+          opacity: fadeIn,
+          opacity: fadeOut,
+        }}>
+        <Animated.Text
+          style={{
+            fontSize: deviceTypeAndroid === 'Handset' ? 18 : 24,
+            fontFamily: 'Outfit-Medium',
+            color: bgLight,
+            textAlign: 'center',
+            transform: [{translateX: animateRight}],
+          }}>
+          <FontAwesome5
+            name="info-circle"
+            size={deviceTypeAndroid === 'Handset' ? Size / 1.8 : Size / 1.2}
+            color={bgLight}
+          />{' '}
+          {message}
+        </Animated.Text>
+      </Animated.View>
+    </SafeAreaView>
+  );
+};
 
 export const SignUpScreen = ({navigation}) => {
+  /*
+  ********************************
+  //Internal Signup State
+  ********************************
+  */
   const [firstname, setFirstname] = useState(null);
   const [lastname, setLastname] = useState(null);
   const [username, setUsername] = useState(null);
@@ -37,18 +132,31 @@ export const SignUpScreen = ({navigation}) => {
   const [visible, setVisible] = useState(true);
 
   const {
-    error: {error},
-  } = useSelector(state => state);
+    //Hook-up to redux store
+    registration,
+    success,
+  } = useSelector(state => state.globals);
   const dispatch = useDispatch();
 
-  const iconName = visible ? 'eye-off' : 'eye';
+  const iconName = visible ? 'eye-slash' : 'eye';
+
+  //validate email authenticity
+  const emailPattern =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
   const handleRegister = () => {
+    const userInfo = {firstname, lastname, username, email, password};
+    /*
+********************************
+//Error Handling
+********************************
+  */
     if (!firstname) {
       dispatch(
-        setError({
+        onRegister({
+          registrationInfo: userInfo,
           isError: true,
-          message: 'Firstname is required',
+          errorMsg: 'Firstname Field Is Missing',
         }),
       );
       return;
@@ -56,18 +164,21 @@ export const SignUpScreen = ({navigation}) => {
 
     if (!lastname) {
       dispatch(
-        setError({
+        onRegister({
+          registrationInfo: userInfo,
           isError: true,
-          message: 'Lastname is required',
+          errorMsg: 'Lastname Field Is Missing',
         }),
       );
       return;
     }
+
     if (!username) {
       dispatch(
-        setError({
+        onRegister({
+          registrationInfo: userInfo,
           isError: true,
-          message: 'Username is required',
+          errorMsg: 'Username Field Is Missing',
         }),
       );
       return;
@@ -75,9 +186,21 @@ export const SignUpScreen = ({navigation}) => {
 
     if (!email) {
       dispatch(
-        setError({
+        onRegister({
+          registrationInfo: userInfo,
           isError: true,
-          message: 'Email is required',
+          errorMsg: 'Email Field Is Missing',
+        }),
+      );
+      return;
+    }
+
+    if (email && !emailPattern.test(email)) {
+      dispatch(
+        onRegister({
+          registrationInfo: userInfo,
+          isError: true,
+          errorMsg: 'Invalid Email Address',
         }),
       );
       return;
@@ -85,219 +208,196 @@ export const SignUpScreen = ({navigation}) => {
 
     if (!password) {
       dispatch(
-        setError({
+        onRegister({
+          registrationInfo: userInfo,
           isError: true,
-          message: 'Password is required',
+          errorMsg: 'Password Field Is Missing',
         }),
       );
       return;
     }
 
-    navigation.navigate('Login', {email});
+    dispatch(
+      setSuccess({
+        isSuccess: true,
+        message: 'Registration Successful',
+        type: 'REGISTRATION',
+      }),
+    );
+
+    setTimeout(
+      () =>
+        dispatch(
+          setSuccess({
+            isSuccess: true,
+            message: 'Directing You To Login...',
+            type: 'REGISTRATION',
+          }),
+        ),
+      3000,
+    );
+    //redirect after 6s
+    setTimeout(() => navigation.navigate('Login', {email, password}), 6000);
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: {bgLight}}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: bgLight}}>
       <StatusBar barStyle="dark-content" backgroundColor={bgLight} />
-      {error.isError && <ErrorComponent message={error.message} />}
-      <ScrollView
-        contentContainerStyle={{
-          backgroundColor: bgLight,
-          paddingVertical: 20,
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: 40,
-            marginHorizontal: 20,
-          }}>
+      {registration.isError && (
+        <SignupErrorComponent
+          message={registration.errorMsg}
+          isError={registration.isError}
+        />
+      )}
+
+      {success.isSuccess && success.type === 'REGISTRATION' && (
+        <SuccessComponent message={success.message} />
+      )}
+      <ScrollView contentContainerStyle={styles.contentsContainer}>
+        <View style={styles.logoContainer}>
           <Image
-            source={require('../assets/rounded-chat.png')}
-            style={{width: 40, height: 40, resizeMode: 'cover'}}
+            source={require('../assets/images/rounded-chat.png')}
+            style={styles.logoImage}
           />
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: '600',
-              marginLeft: 8,
-              color: lightDark,
-            }}>
-            Chatty
-          </Text>
+          <Text style={styles.logoText}>Chatty</Text>
         </View>
 
-        <Text
-          style={{
-            fontSize: 27,
-            fontWeight: '500',
-            color: lightDark,
-            marginLeft: 20,
-          }}>
-          Explore Possibilities!
-        </Text>
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: '400',
-            color: lightDark,
-            marginLeft: 20,
-            marginTop: 10,
-          }}>
-          SignUp Now
-        </Text>
+        <Text style={styles.title}>Explore Possibilities!</Text>
+        <Text style={styles.description}>SignUp Now</Text>
         <View
           style={{
-            marginVertical: 45,
-            marginHorizontal: 20,
+            marginVertical: 20,
           }}>
           <View style={styles.fieldContainer}>
-            <TouchableOpacity style={{position: 'absolute', left: 0, top: 16}}>
-              <Ionicons name="person" color={colorDisabled} size={Size} />
+            <TouchableOpacity
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: deviceTypeAndroid === 'Handset' ? 16 : 8,
+              }}>
+              <FontAwesome5
+                name="user-alt"
+                color={colorDisabled}
+                size={deviceTypeAndroid === 'Handset' ? Size : Size * 1.5}
+              />
             </TouchableOpacity>
             <TextInput
               placeholderTextColor={colorDisabled}
-              placeholder="firstname"
-              style={{
-                borderBottomWidth: 1,
-                borderBottomColor: colorDisabled,
-                marginBottom: 10,
-                fontSize: 18,
-                fontWeight: '500',
-                color: lightDark,
-                paddingLeft: 40,
-              }}
+              placeholder="Firstname"
+              style={styles.textInput}
               defaultValue={firstname}
               onChangeText={fName => setFirstname(fName)}
             />
           </View>
           <View style={styles.fieldContainer}>
-            <TouchableOpacity style={{position: 'absolute', left: 0, top: 16}}>
-              <MaterialIcons
-                name="person-outline"
+            <TouchableOpacity
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: deviceTypeAndroid === 'Handset' ? 16 : 8,
+              }}>
+              <FontAwesome5
+                name="user"
                 color={colorDisabled}
-                size={Size}
+                size={deviceTypeAndroid === 'Handset' ? Size : Size * 1.5}
               />
             </TouchableOpacity>
             <TextInput
               placeholderTextColor={colorDisabled}
-              placeholder="lastname"
-              style={{
-                borderBottomWidth: 1,
-                borderBottomColor: colorDisabled,
-                fontSize: 18,
-                fontWeight: '500',
-                color: lightDark,
-                paddingLeft: 40,
-              }}
+              placeholder="Lastname"
+              style={styles.textInput}
               defaultValue={lastname}
               onChangeText={lName => setLastname(lName)}
             />
           </View>
           <View style={styles.fieldContainer}>
-            <TouchableOpacity style={{position: 'absolute', left: 0, top: 16}}>
-              <Ionicons
-                name="person-circle"
+            <TouchableOpacity
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: deviceTypeAndroid === 'Handset' ? 16 : 8,
+              }}>
+              <FontAwesome5
+                name="user-check"
                 color={colorDisabled}
-                size={Size}
+                size={deviceTypeAndroid === 'Handset' ? Size : Size * 1.5}
               />
             </TouchableOpacity>
             <TextInput
               placeholderTextColor={colorDisabled}
-              placeholder="username"
-              style={{
-                borderBottomWidth: 1,
-                borderBottomColor: '#ccc',
-                marginBottom: 10,
-                fontSize: 18,
-                fontWeight: '500',
-                color: lightDark,
-                paddingLeft: 40,
-              }}
+              placeholder="Username"
+              style={styles.textInput}
               defaultValue={username}
               onChangeText={uName => setUsername(uName)}
             />
           </View>
 
           <View style={styles.fieldContainer}>
-            <TouchableOpacity style={{position: 'absolute', left: 0, top: 16}}>
-              <MaterialIcons
-                name="alternate-email"
+            <TouchableOpacity
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: deviceTypeAndroid === 'Handset' ? 16 : 8,
+              }}>
+              <FontAwesome5
+                name="at"
                 color={colorDisabled}
-                size={Size}
+                size={deviceTypeAndroid === 'Handset' ? Size : Size * 1.5}
               />
             </TouchableOpacity>
             <TextInput
               placeholderTextColor={colorDisabled}
-              placeholder="email"
-              style={{
-                borderBottomWidth: 1,
-                borderBottomColor: '#ccc',
-                marginBottom: 10,
-                fontSize: 18,
-                fontWeight: '500',
-                color: lightDark,
-                paddingLeft: 40,
-              }}
+              placeholder="Email"
+              style={styles.textInput}
               defaultValue={email}
               onChangeText={mail => setEmail(mail)}
             />
           </View>
           <View style={styles.fieldContainer}>
-            <TouchableOpacity style={{position: 'absolute', left: 0, top: 16}}>
-              <MaterialIcons name="vpn-key" color={colorDisabled} size={Size} />
+            <TouchableOpacity
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: deviceTypeAndroid === 'Handset' ? 16 : 8,
+              }}>
+              <FontAwesome5
+                name="key"
+                color={colorDisabled}
+                size={deviceTypeAndroid === 'Handset' ? Size : Size * 1.5}
+              />
             </TouchableOpacity>
             <TextInput
               placeholderTextColor={colorDisabled}
-              style={{
-                borderBottomWidth: 1,
-                borderBottomColor: '#ccc',
-                fontSize: 18,
-                fontWeight: '500',
-                color: lightDark,
-                paddingLeft: 40,
-              }}
-              placeholder="password"
+              style={styles.textInput}
+              placeholder="Password"
               defaultValue={password}
               onChangeText={passwd => setPassword(passwd)}
               secureTextEntry={visible}
             />
             <TouchableOpacity
-              style={{position: 'absolute', right: 0, top: 16}}
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: deviceTypeAndroid === 'Handset' ? 16 : 8,
+              }}
               onPress={() => setVisible(!visible)}>
-              <Ionicons name={iconName} color={colorDisabled} size={Size} />
+              <FontAwesome5
+                name={iconName}
+                color={colorDisabled}
+                size={deviceTypeAndroid === 'Handset' ? Size : Size * 1.5}
+              />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            onPress={handleRegister}
-            style={{
-              alignSelf: 'center',
-              padding: 15,
-              width: '100%',
-              borderRadius: 50,
-              backgroundColor: bgPrimary,
-              marginTop: 20,
-            }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: '500',
-                color: bgLight,
-                textAlign: 'center',
-              }}>
-              SignUp Now
-            </Text>
+          <TouchableOpacity onPress={handleRegister} style={styles.btnSignup}>
+            <Text style={styles.btnSignupText}>SignUp Now</Text>
           </TouchableOpacity>
           <Text
             style={{
-              fontSize: 14,
-              fontWeight: '500',
+              fontSize: deviceTypeAndroid === 'Handset' ? 14 : 20,
+              fontFamily: 'Outfit-Medium',
               color: lightDark,
-              marginLeft: 20,
               marginTop: 10,
               textAlign: 'center',
-              width: '80%',
-              alignSelf: 'center',
             }}>
             By registering, you acknowledge and agree to our{' '}
             <Text style={{textDecorationLine: 'underline'}}>
@@ -311,43 +411,27 @@ export const SignUpScreen = ({navigation}) => {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            marginTop: 10,
+            marginTop: 20,
           }}>
-          <TouchableOpacity>
-            <MaterialIcons name="facebook" color={colorFb} size={Size + 7} />
+          <TouchableOpacity
+            style={{...styles.btnSocial, backgroundColor: bgPrimary}}>
+            <FontAwesome5 name="facebook-f" color={bgLight} size={Size} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 50,
-              backgroundColor: colorGoogle,
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginHorizontal: 8,
-              marginRight: 10,
-            }}>
+          <TouchableOpacity style={styles.btnSocial}>
             <MaterialCommunityIcons
               name="google"
               color={bgLight}
-              size={Size - 5}
+              size={Size}
               style={{borderRadius: 50}}
             />
           </TouchableOpacity>
           <TouchableOpacity
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 50,
-              backgroundColor: bgPrimary,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
+            style={{...styles.btnSocial, backgroundColor: bgPrimary}}>
             <FontAwesome5
               name="linkedin-in"
               color={bgLight}
-              size={Size - 7}
+              size={Size}
               style={{borderRadius: 50}}
             />
           </TouchableOpacity>
@@ -359,22 +443,13 @@ export const SignUpScreen = ({navigation}) => {
             alignItems: 'center',
             alignSelf: 'center',
           }}>
-          <Text
-            style={{
-              textAlign: 'center',
-              fontSize: 16,
-              fontWeight: '500',
-              color: lightDark,
-            }}>
-            Already have account?{' '}
-          </Text>
+          <Text style={styles.textInfo}>Already have account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
             <Text
               style={{
-                textAlign: 'center',
-                fontSize: 16,
-                fontWeight: '500',
-                color: textDark,
+                ...styles.textInfo,
+                fontWeight: 'bold',
+                color: bgPrimary,
               }}>
               SignIn
             </Text>
@@ -386,7 +461,92 @@ export const SignUpScreen = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
+  contentsContainer: {
+    backgroundColor: bgLight,
+    paddingVertical: 40,
+    width: '100%',
+    paddingHorizontal: 40,
+    alignSelf: 'center',
+  },
+
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+
+  logoImage: {
+    width: deviceTypeAndroid === 'Handset' ? 40 : 60,
+    height: deviceTypeAndroid === 'Handset' ? 40 : 60,
+    resizeMode: 'cover',
+  },
+
+  logoText: {
+    fontSize: deviceTypeAndroid === 'Handset' ? 24 : 30,
+    marginLeft: 8,
+    color: textDark,
+    fontFamily: 'Outfit-Bold',
+  },
+
+  description: {
+    fontSize: deviceTypeAndroid === 'Handset' ? 18 : 30,
+    fontFamily: 'Outfit-Medium',
+    color: lightDark,
+    marginTop: 10,
+  },
+
+  title: {
+    fontSize: deviceTypeAndroid === 'Handset' ? 24 : 30,
+    fontFamily: 'Outfit-Bold',
+    color: lightDark,
+  },
+
   fieldContainer: {
+    marginTop: 20,
+  },
+
+  textInput: {
+    borderBottomWidth: 1,
+    borderBottomColor: colorDisabled,
     marginBottom: 10,
+    fontSize: deviceTypeAndroid === 'Handset' ? 18 : 24,
+    fontFamily: 'Outfit-Medium',
+    color: lightDark,
+    paddingLeft: deviceTypeAndroid === 'Handset' ? 45 : 60,
+  },
+
+  btnSignup: {
+    alignSelf: 'center',
+    padding: 15,
+    width: '100%',
+    borderRadius: 50,
+    backgroundColor: bgPrimary,
+    marginTop: 20,
+  },
+
+  btnSignupText: {
+    fontSize: deviceTypeAndroid === 'Handset' ? 18 : 24,
+    fontFamily:
+      deviceTypeAndroid === 'Handset' ? 'Outfit-Medium' : 'Outfit-Bold',
+    color: bgLight,
+    textAlign: 'center',
+  },
+
+  btnSocial: {
+    width: deviceTypeAndroid === 'Handset' ? 35 : 50,
+    height: deviceTypeAndroid === 'Handset' ? 35 : 50,
+    borderRadius: 50,
+    backgroundColor: colorGoogle,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 8,
+    marginRight: 10,
+  },
+
+  textInfo: {
+    textAlign: 'center',
+    fontSize: deviceTypeAndroid === 'Handset' ? 16 : 24,
+    fontFamily: 'Outfit-Medium',
+    color: lightDark,
   },
 });

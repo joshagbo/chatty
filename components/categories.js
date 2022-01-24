@@ -8,81 +8,34 @@ import {
   FlatList,
   SafeAreaView,
   useWindowDimensions,
+  StyleSheet,
 } from 'react-native';
-
-const dark = '#333';
-const lightDark = '#666';
-const bgPrimary = '#4D4A95';
-
-const categoryList = [
-  {
-    title: 'Metaverse',
-    key: 'Meta',
-    poster: require('../assets/meta.jpg'),
-    tags: [],
-  },
-  {
-    title: 'AI',
-    key: 'AI',
-    poster: require('../assets/ai.jpg'),
-    tags: [],
-  },
-  {
-    title: 'BlockChain',
-    key: 'blockchain',
-    poster: require('../assets/blockchain.jpg'),
-    tags: [],
-  },
-  {
-    title: 'Aria Photography',
-    key: 'Aria Photography',
-    poster: require('../assets/aria_photography.jpg'),
-    tags: [],
-  },
-  {
-    title: 'Climate Change',
-    key: 'Climate Change',
-    poster: require('../assets/climate.jpg'),
-    tags: [],
-  },
-];
+import {bgLight, Size, bgPrimary, lightDark, textDark} from '../utils/colors';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import {deviceTypeAndroid} from '../utils/platforms';
+import {useSelector} from 'react-redux';
 
 //List Footer
 const ListFooterComponent = () => (
   <View>
     <Text
       style={{
-        color: lightDark,
+        ...styles.description,
+        fontWeight: '500',
         textAlign: 'center',
-        fontSize: 18,
-        fontWeight: '600',
+        marginBottom: 0,
       }}>
       I have interest on something else?
     </Text>
     <TouchableOpacity
       style={{
-        backgroundColor: bgPrimary,
-        padding: 12,
-        marginTop: 10,
-        borderRadius: 15,
+        ...styles.btnLogin,
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <Image
-        source={require('../assets/discussion.png')}
-        style={{width: 35, height: 35, marginRight: 10}}
-      />
-      <Text
-        style={{
-          color: dark,
-          textAlign: 'center',
-          fontSize: 18,
-          fontWeight: '600',
-          color: '#fff',
-        }}>
-        Create Discussion
-      </Text>
+      <Text style={styles.btnLoginText}>Create Discussion</Text>
+      <FontAwesome5 name="bullhorn" size={Size} color={bgLight} />
     </TouchableOpacity>
   </View>
 );
@@ -90,21 +43,15 @@ const ListFooterComponent = () => (
 //ListHeader
 const ListHeaderComponent = () => (
   <View>
-    <Text
-      style={{
-        fontSize: 18,
-        fontWeight: '500',
-        color: dark,
-        textAlign: 'center',
-      }}>
-      Pick interests. Join the discussion
-    </Text>
+    <Text style={styles.title}>Trending Discussions</Text>
   </View>
 );
 
-export const Categories = () => {
+export const Categories = ({navigation}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [endThreshholdReached, setEndThresholdReached] = useState(false);
+
+  const {discussionList} = useSelector(state => state.globals);
 
   const onImagePressed = isSelected => {
     // setCategory(isSelected);
@@ -137,24 +84,50 @@ export const Categories = () => {
           justifyContent: 'center',
           paddingVertical: 10,
         }}>
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: '500',
-            color: lightDark,
-            marginBottom: 10,
-          }}>
-          {item.title}
-        </Text>
-        <TouchableOpacity onPress={() => onImagePressed(item.title)}>
+        <Text style={styles.description}>{item.title}</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Discussion', {id: item.key})}
+          style={{opacity: 0.9}}>
           <Image
             source={item.poster}
             style={{
               width: '100%',
-              height: 200,
+              height: 300,
               borderRadius: 15,
+              resizeMode: deviceTypeAndroid === 'Handset' ? 'stretch' : 'cover',
             }}
           />
+          <TouchableOpacity
+            onPress={() => onImagePressed(item.title)}
+            style={{
+              position: 'absolute',
+              right: 30,
+              top: 20,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <Text
+              style={{
+                color: bgLight,
+                fontSize: deviceTypeAndroid === 'Handset' ? 16 : 27,
+                fontFamily:
+                  deviceTypeAndroid === 'Handset'
+                    ? 'Outfit-Medium'
+                    : 'Outfit-Bold',
+                marginRight: 5,
+              }}>
+              Join
+            </Text>
+            <View
+              style={{
+                backgroundColor: '#3b5998',
+                borderRadius: 50,
+                padding: 5,
+              }}>
+              <FontAwesome5 name="plus" size={Size / 2} color={bgLight} />
+            </View>
+          </TouchableOpacity>
         </TouchableOpacity>
       </View>
     );
@@ -164,9 +137,9 @@ export const Categories = () => {
     <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
       <FlatList
         stickyHeaderHiddenOnScroll={true}
-        data={categoryList}
+        data={discussionList}
         renderItem={_renderItem}
-        keyExtractor={(item, key) => item.key}
+        keyExtractor={(_, key) => key}
         ListHeaderComponent={ListHeaderComponent}
         ListHeaderComponentStyle={{paddingBottom: 16}}
         ListFooterComponent={endThreshholdReached && ListFooterComponent}
@@ -190,3 +163,37 @@ export const Categories = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  description: {
+    fontSize: deviceTypeAndroid === 'Handset' ? 18 : 27,
+    fontFamily: 'Outfit',
+    color: lightDark,
+    marginBottom: 10,
+  },
+
+  title: {
+    fontSize: deviceTypeAndroid === 'Handset' ? 20 : 35,
+    fontFamily: 'Outfit-Bold',
+    color: lightDark,
+    textAlign: 'center',
+    marginTop: 10,
+  },
+
+  btnLogin: {
+    alignSelf: 'center',
+    padding: 15,
+    width: '100%',
+    borderRadius: 50,
+    backgroundColor: bgPrimary,
+    marginTop: 20,
+  },
+  btnLoginText: {
+    fontSize: deviceTypeAndroid === 'Handset' ? 18 : 24,
+    marginRight: 5,
+    fontFamily:
+      deviceTypeAndroid === 'Handset' ? 'Outfit-Medium' : 'Outfit-Bold',
+    color: bgLight,
+    textAlign: 'center',
+  },
+});
